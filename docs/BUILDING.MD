@@ -24,7 +24,7 @@ If conventional PlatformIO is retained instead, the project must select an Ardui
 
 ## ESP-IDF
 
-The supplied PlatformIO ESP-IDF demo explicitly enables C++20 and consumes the repository itself through `lib_extra_dirs`. A native ESP-IDF component may likewise include the repository `src` directory and compile C++ translation units as C++20.
+The supplied PlatformIO-compatible ESP-IDF using PIOArduino demo explicitly enables C++20 and consumes the repository itself through `lib_extra_dirs`. A native ESP-IDF component may likewise include the repository `src` directory and compile C++ translation units as C++20.
 
 ## Arduino IDE
 
