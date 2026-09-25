@@ -31,29 +31,28 @@ namespace ESPressio::BoundedTopology {
             "The positive-capacity BoundedIndexSet specialization requires capacity greater than zero."
         );
 
-        public:
-
-            // Public Type metadata.
-
-            /// Strong index Type represented by this set.
-            using Index = BoundedIndex<TIndexSpace, TCapacity>;
-
-            /// Exact retained bytes required for one bit per represented index.
-            static constexpr std::size_t StorageBytes = (TCapacity + 7U) / 8U;
-
         private:
+
+            // Internal Type and storage metadata.
+
+            /// Strong index Type represented internally by this set.
+            using IndexType = BoundedIndex<TIndexSpace, TCapacity>;
+
+            /// Exact retained byte count required for one bit per represented index.
+            static constexpr std::size_t StorageByteCount = (TCapacity + 7U) / 8U;
+
 
             // Compact membership state.
 
             /// One bit per bounded index. A set bit means that index belongs to this set.
-            std::uint8_t _bytes[StorageBytes] = {};
+            std::uint8_t _bytes[StorageByteCount] = {};
 
 
             // Bit addressing.
 
             /// Returns the backing-byte ordinal for one known-valid index.
             static constexpr std::size_t ByteIndex(
-                Index index
+                IndexType index
             ) noexcept {
                 return static_cast<std::size_t>(
                     index.Value()
@@ -62,7 +61,7 @@ namespace ESPressio::BoundedTopology {
 
             /// Returns the one-bit mask for one known-valid index.
             static constexpr std::uint8_t BitMask(
-                Index index
+                IndexType index
             ) noexcept {
                 return static_cast<std::uint8_t>(
                     1U << (
@@ -92,6 +91,15 @@ namespace ESPressio::BoundedTopology {
             }
 
         public:
+
+            // Public Type metadata.
+
+            /// Strong index Type represented by this set.
+            using Index = IndexType;
+
+            /// Exact retained bytes required for one bit per represented index.
+            static constexpr std::size_t StorageBytes = StorageByteCount;
+
 
             // Construction.
 
