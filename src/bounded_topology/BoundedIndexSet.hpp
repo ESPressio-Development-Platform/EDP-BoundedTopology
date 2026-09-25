@@ -39,7 +39,8 @@ namespace ESPressio::BoundedTopology {
             using IndexType = BoundedIndex<TIndexSpace, TCapacity>;
 
             /// Exact retained byte count required for one bit per represented index.
-            static constexpr std::size_t StorageByteCount = (TCapacity + 7U) / 8U;
+            static constexpr std::size_t StorageByteCount =
+                (TCapacity / 8U) + ((TCapacity % 8U) != 0U ? 1U : 0U);
 
 
             // Compact membership state.
