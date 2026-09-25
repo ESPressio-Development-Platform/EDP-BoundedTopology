@@ -396,7 +396,7 @@ namespace {
         );
     }
 
-} // namespace
+} // anonymous namespace
 
 
 int main() {
