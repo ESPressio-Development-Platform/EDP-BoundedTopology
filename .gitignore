@@ -427,3 +427,20 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+# macOS filesystem metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows filesystem metadata
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# PlatformIO / PIOArduino local build state
+.pio/
+.pioenvs/
+.piolibdeps/
+platformio_override.ini
