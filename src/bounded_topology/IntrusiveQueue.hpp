@@ -61,24 +61,29 @@ namespace ESPressio::BoundedTopology {
             "The positive-capacity IntrusiveQueue specialization requires capacity greater than zero."
         );
 
+        private:
+
+            // Internal Type metadata.
+
+            /// Strong bounded index Type used internally by this FIFO topology.
+            using IndexType = BoundedIndex<TIndexSpace, TCapacity>;
+
+
+            // FIFO endpoints.
+
+            /// First queued record, or Invalid when the queue is empty.
+            IndexType _head = IndexType::Invalid();
+
+            /// Last queued record, or Invalid when the queue is empty.
+            IndexType _tail = IndexType::Invalid();
+
         public:
 
             // Public Type metadata.
 
             /// Strong bounded index Type used by this FIFO topology.
-            using Index = BoundedIndex<TIndexSpace, TCapacity>;
+            using Index = IndexType;
 
-        private:
-
-            // FIFO endpoints.
-
-            /// First queued record, or Invalid when the queue is empty.
-            Index _head = Index::Invalid();
-
-            /// Last queued record, or Invalid when the queue is empty.
-            Index _tail = Index::Invalid();
-
-        public:
 
             // Construction.
 
