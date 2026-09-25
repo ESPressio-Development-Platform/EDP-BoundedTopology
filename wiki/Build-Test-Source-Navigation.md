@@ -21,7 +21,7 @@ The initial implementation validation reconstructed the committed source exactly
 
 ## Demos
 
-`demos/BoundedTopology` provides Arduino IDE, PIOArduino/Arduino-ESP32 and PlatformIO ESP-IDF surfaces. Target builds are not claimed as executed by the implementation environment because external platform packages could not be fetched there.
+`demos/BoundedTopology` provides Arduino IDE, PIOArduino/Arduino-ESP32 and PlatformIO-compatible ESP-IDF using PIOArduino surfaces. Target builds are not claimed as executed by the implementation environment because external platform packages could not be fetched there.
 
 ## Package metadata
 
