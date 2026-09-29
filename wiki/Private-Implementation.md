@@ -16,6 +16,14 @@ Private helpers:
 
 The zero-capacity specialization has no private member state.
 
+## BoundedSlotTopology
+
+`OccupancySet` is the private `BoundedIndexSet<TIndexSpace,TCapacity>` alias. `_occupied` is the **only retained semantic member** and is marked `[[no_unique_address]]` so zero-capacity empty state can overlap owner storage.
+
+`Acquire()` delegates free-slot discovery to `BoundedIndexSet::FindFirstClear()` and then establishes occupancy through `Set()`. `Release()` validates both strong-index validity and current occupancy before `Clear()`. Traversal performs numeric bounded scans without retaining a cursor.
+
+`BoundedSlotAcquisitionResult` privately retains only its status and result index; its constructor is accessible only to the matching topology specialization so a successful status cannot be paired with a fabricated unrelated index through the supported API.
+
 ## IntrusiveQueue positive capacity
 
 `IndexType` is the private strong index alias. `_head` and `_tail` are the only retained members. Invalid head means empty; tail is retained to preserve O(1) append.

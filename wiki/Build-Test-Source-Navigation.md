@@ -8,14 +8,15 @@ src/
 └── bounded_topology/
     ├── BoundedIndex.hpp
     ├── BoundedIndexSet.hpp
+    ├── BoundedSlotTopology.hpp
     └── IntrusiveQueue.hpp
 ```
 
 ## Tests
 
-`tests/BoundedTopologyTests.cpp` provides compile-time footprint/type checks plus runtime FIFO/zero-capacity behavior tests.
+`tests/BoundedTopologyTests.cpp` provides compile-time footprint/type checks plus deterministic stable-slot acquisition/release/traversal, FIFO, membership and zero-capacity behavior tests.
 
-`tests/run_tests.py` builds with C++20, warnings-as-errors and executes the host binary.
+`tests/run_tests.py` builds with C++20, warnings-as-errors and executes the host binary. `.github/workflows/validate.yml` mirrors the maintained CI contract with GCC/Clang host tests and PIOArduino Arduino/ESP-IDF demo builds; RPI400 remains the authoritative operational validation environment.
 
 The initial implementation validation reconstructed the committed source exactly because the execution environment could not resolve GitHub directly. `/usr/bin/c++` host build/run completed with `EDP-BoundedTopology host tests: PASS`.
 

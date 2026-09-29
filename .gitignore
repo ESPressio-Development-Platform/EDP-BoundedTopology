@@ -444,3 +444,8 @@ Desktop.ini
 .pioenvs/
 .piolibdeps/
 platformio_override.ini
+# Local host-test build state
+tests/.test-build/
+# PlatformIO / PIOArduino generated ESP-IDF project state
+demos/BoundedTopology/PlatformIO_ESP-IDF/CMakeLists.txt
+demos/BoundedTopology/PlatformIO_ESP-IDF/sdkconfig.*

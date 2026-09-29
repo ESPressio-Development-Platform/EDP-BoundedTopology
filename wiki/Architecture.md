@@ -4,21 +4,28 @@
 
 EDP-BoundedTopology is a dependency-minimal foundation below higher runtime domains such as Memory, Threading, Command, Event, Radio/Mesh or future endpoint/resource managers when they need the same finite-index mechanics.
 
-The architectural split is **value ownership versus non-owning topology**. `EDP-BoundedTypes` owns value/container storage. `EDP-Memory` owns object-pool allocation/lifetime semantics. EDP-BoundedTopology owns only finite identity, membership and FIFO relationship state.
+The architectural split is **value ownership versus non-owning topology**. `EDP-BoundedTypes` owns value/container storage. `EDP-Memory` owns object-pool allocation/lifetime semantics. EDP-BoundedTopology owns only finite identity, membership, stable occupancy-slot lifecycle and FIFO relationship state.
 
 ## Primitive relationship
 
 ```text
 BoundedIndex
     ├── BoundedIndexSet
+    │   └── BoundedSlotTopology
     └── IntrusiveQueue
 ```
 
-`BoundedIndexSet` and `IntrusiveQueue` use exactly the same strong index Type for a given semantic space/capacity.
+`BoundedIndexSet`, `BoundedSlotTopology` and `IntrusiveQueue` use exactly the same strong index Type for a given semantic space/capacity. `BoundedSlotTopology` composes `BoundedIndexSet` and adds no persistent state beyond its occupancy bits.
 
 ## Pool decision
 
 There is intentionally no state-owning generic `Pool`. A fixed Worker population may require only one availability set, whereas a runtime endpoint population may require several independent state sets. The owning domain pays only for the state it actually needs.
+
+## Stable slot ownership
+
+`BoundedSlotTopology` owns occupancy only. It deterministically acquires the numerically lowest free slot and keeps that slot stable until explicit release. Payload storage/lifetime, generation/stale-reference protection and transaction ordering remain external.
+
+This is deliberately not a generic state-owning Pool. The first identified higher-domain consumer is `EDP-RemoteSystem::DeviceRegistry`, which can use a stable slot as a compact registration-lifetime foreign key while retaining its own Device and facet semantics.
 
 ## Queue ownership
 

@@ -8,6 +8,7 @@ The library is deliberately smaller than a container library. It does not own pa
 
 - `BoundedIndex<TIndexSpace, N>` — strong capacity-derived identity for one position in a finite index space.
 - `BoundedIndexSet<TIndexSpace, N>` — compact membership state using exactly one bit per represented index for positive capacity.
+- `BoundedSlotTopology<TIndexSpace, N>` — payload-agnostic stable slot acquisition/release using exactly the existing occupancy bitmap and no additional persistent state.
 - `IntrusiveQueue<TIndexSpace, N>` — non-owning FIFO topology retaining only compact head/tail indices while next linkage remains in externally owned records.
 
 There is intentionally no generic state-owning `Pool` Type. Domains compose only the index-set state they actually require.
@@ -15,6 +16,7 @@ There is intentionally no generic state-owning `Pool` Type. Domains compose only
 ## Documentation
 
 - [Architecture](./docs/ARCHITECTURE.MD) — ownership boundaries, primitive relationships, queue-record contract, and explicit non-goals.
+- [Stable bounded slot topology](./docs/STABLE_SLOT_TOPOLOGY.MD) — acquisition/release contract, strong results, traversal, ownership boundaries, and zero-capacity semantics.
 - [Memory and complexity](./docs/MEMORY_AND_COMPLEXITY.MD) — exact retained-state rules, capacity-derived widths, zero-capacity behaviour, and bounded operation costs.
 - [Building and validation](./docs/BUILDING.MD) — C++20 baseline, host tests, PIOArduino guidance, and demo build surfaces.
 - [Demos](./demos/README.MD) — buildable demonstration matrix.
@@ -34,11 +36,14 @@ BoundedIndex
 BoundedIndexSet
     ceil(N / 8) bytes
 
+BoundedSlotTopology
+    ceil(N / 8) bytes
+
 IntrusiveQueue
     2 × sizeof(BoundedIndex)
 ```
 
-`BoundedIndexSet` retains no population count. `IntrusiveQueue` retains no queue size or owned link table. Zero-capacity set/queue specializations contain no state and can disappear inside an owning object when composed with `[[no_unique_address]]`.
+`BoundedIndexSet` retains no population count. `BoundedSlotTopology` composes that same occupancy representation and retains no free list, cached count, generation or payload state. `IntrusiveQueue` retains no queue size or owned link table. Zero-capacity set/slot-topology/queue forms contain no semantic state and can disappear inside an owning object when composed with `[[no_unique_address]]`.
 
 ## Dependencies
 
@@ -65,4 +70,4 @@ Run the host suite from the repository root:
 python3 tests/run_tests.py
 ```
 
-The suite compiles with warnings as errors and validates capacity-derived index widths, semantic index-space separation, checked construction, exact set/queue footprints, membership/FIFO behaviour, and zero-capacity composition.
+The suite compiles with warnings as errors and validates capacity-derived index widths, semantic index-space separation, checked construction, exact set/slot-topology/queue footprints, deterministic slot acquisition/release/traversal, membership/FIFO behaviour, and zero-capacity composition.

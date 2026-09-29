@@ -2,17 +2,17 @@
 
 ## Retained memory
 
-`BoundedIndex` stores one capacity-derived scalar. `BoundedIndexSet` positive capacity stores exactly `ceil(N/8)` bytes. `IntrusiveQueue` positive capacity stores exactly two bounded indices.
+`BoundedIndex` stores one capacity-derived scalar. `BoundedIndexSet` positive capacity stores exactly `ceil(N/8)` bytes. `BoundedSlotTopology` positive capacity stores exactly that same `ceil(N/8)` occupancy footprint and no additional semantic state. `IntrusiveQueue` positive capacity stores exactly two bounded indices.
 
 No population/queue count is cached.
 
 ## Zero capacity
 
-Zero-capacity set/queue specializations contain no members. A complete empty C++ object still has non-zero `sizeof`, but an owner can use `[[no_unique_address]]` so the empty topology contributes no additional retained bytes. Host tests enforce this composition property.
+Zero-capacity set/slot-topology/queue forms contain no semantic state. A complete empty C++ object still has non-zero `sizeof`, but an owner can use `[[no_unique_address]]` so the empty topology contributes no additional retained bytes. Host tests enforce this composition property.
 
 ## Lifecycle
 
-The primitives require no initialization/teardown phase. Construction establishes Invalid/empty state. They own no external resource requiring release.
+The primitives require no initialization/teardown phase. Construction establishes Invalid/empty/free state. They own no external resource requiring release.
 
 ## Allocation
 
@@ -28,4 +28,4 @@ No general ISR-safety guarantee is made. Local operations do not allocate or blo
 
 ## Complexity
 
-`Set/Clear/IsSet`, queue Push/Pop and basic index operations are O(1). Set scans/count and specific queue removal are bounded O(N). The bounded scans are intentional RAM-saving tradeoffs.
+`Set/Clear/IsSet`, slot Release/IsOccupied, queue Push/Pop and basic index operations are O(1). Slot Acquire/full/count/traversal, set scans/count and specific queue removal are bounded O(N). The bounded scans are intentional RAM-saving tradeoffs.

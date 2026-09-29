@@ -1,0 +1,54 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  host-tests:
+    name: Host tests (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+          - g++
+          - clang++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run host tests
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: python3 tests/run_tests.py
+
+  platformio-arduino:
+    name: PIOArduino Arduino build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PlatformIO frontend
+        run: python3 -m pip install --upgrade platformio
+
+      - name: Build Arduino-ESP32 demo
+        working-directory: demos/BoundedTopology/PlatformIO_Arduino
+        run: pio run
+
+  platformio-esp-idf:
+    name: PIOArduino ESP-IDF build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PlatformIO frontend
+        run: python3 -m pip install --upgrade platformio
+
+      - name: Build ESP-IDF demo
+        working-directory: demos/BoundedTopology/PlatformIO_ESP-IDF
+        run: pio run

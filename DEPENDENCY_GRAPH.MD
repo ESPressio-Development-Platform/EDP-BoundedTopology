@@ -1,6 +1,6 @@
 # EDP-BoundedTopology Dependency Graph
 
-> Established: 2026-09-25 — initial 0.1.0 development baseline.
+> Established: 2026-09-25 — initial 0.1.0 development baseline. Revalidated 2026-09-29 for the stable bounded slot topology; dependency direction remains unchanged.
 
 ## Library Dependency Tree
 

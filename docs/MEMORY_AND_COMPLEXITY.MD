@@ -36,6 +36,19 @@ The host tests explicitly enforce representative size boundaries.
 
 The zero-capacity specialization contains no state. C++ complete objects cannot have `sizeof(T) == 0`, but `[[no_unique_address]]` permits the empty specialization to consume no additional retained bytes when embedded in an owning facility. The host tests validate that composition property.
 
+## BoundedSlotTopology footprint
+
+`BoundedSlotTopology<TIndexSpace, N>` retains only its composed occupancy set. For positive capacity:
+
+```text
+StorageBytes = ceil(N / 8)
+sizeof(BoundedSlotTopology<TSpace, N>) == StorageBytes
+```
+
+There is no free list, cached count, first-free hint, rotating cursor, generation field, payload pointer, capacity field or synchronization member. Representative boundary sizes are compile-time tested.
+
+The zero-capacity topology has no semantic member state and is tested with `[[no_unique_address]]` composition so it need not increase the owner footprint.
+
 ## IntrusiveQueue footprint
 
 For positive capacity:
@@ -78,6 +91,19 @@ This is considered essential topology state rather than a convenience cache.
 | FindFirstSet | O(N) | no cached first index |
 | FindFirstClear | O(N) | no cached first index |
 
+### BoundedSlotTopology
+
+| Operation | Complexity | Persistent extra state |
+| --- | ---: | ---: |
+| IsOccupied | O(1) | none |
+| IsEmpty | O(ceil(N/8)) | none |
+| Acquire | O(N) | no free list/first-free cache |
+| Release | O(1) | none |
+| IsFull | O(N) | no cached first-free |
+| Count | O(N) | no cached count |
+| FindFirstOccupied | O(N) | no traversal cursor |
+| FindNextOccupied | O(N) bounded | no traversal cursor |
+
 ### IntrusiveQueue
 
 | Operation | Complexity | Persistent extra state |
@@ -91,7 +117,7 @@ This is considered essential topology state rather than a convenience cache.
 
 No primitive performs dynamic allocation.
 
-`BoundedIndexSet` owns only its bitmap bytes. `IntrusiveQueue` owns only queue endpoints. Record linkage and record lifetime remain external.
+`BoundedIndexSet` owns only its bitmap bytes. `BoundedSlotTopology` owns only that same bitmap-shaped occupancy state. `IntrusiveQueue` owns only queue endpoints. Record linkage and record lifetime remain external.
 
 The library never constructs, destroys, relocates, retains, or releases represented payload objects.
 

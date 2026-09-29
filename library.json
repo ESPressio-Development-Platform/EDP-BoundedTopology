@@ -1,7 +1,7 @@
 {
   "name": "EDP-BoundedTopology",
-  "description": "Dependency-minimal compact bounded-index, membership and intrusive FIFO topology primitives for ESPressio",
-  "keywords": "espressio,bounded,topology,index,bitmap,intrusive,queue,embedded",
+  "description": "Dependency-minimal compact bounded-index, membership, stable-slot and intrusive FIFO topology primitives for ESPressio",
+  "keywords": "espressio,bounded,topology,index,bitmap,slot,intrusive,queue,embedded",
   "homepage": "https://espressio.org",
   "authors": {
     "name": "Simon Stuart",

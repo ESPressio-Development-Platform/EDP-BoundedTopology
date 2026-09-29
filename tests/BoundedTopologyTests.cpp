@@ -114,6 +114,52 @@ namespace {
         sizeof(ZeroSetHolder) == 1U
     );
 
+    // Stable-slot topology footprint aliases.
+
+    /// One-slot topology used to validate one-byte minimum positive occupancy storage.
+    using SlotTopology1 = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 1U>;
+    /// Eight-slot topology used to validate one complete occupancy byte.
+    using SlotTopology8 = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 8U>;
+    /// Nine-slot topology used to validate expansion into a second occupancy byte.
+    using SlotTopology9 = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 9U>;
+    /// Representative larger topology used to validate exact ceil(N/8) occupancy storage.
+    using SlotTopology255 = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 255U>;
+    /// Zero-capacity topology used to validate empty-state composition.
+    using SlotTopology0 = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 0U>;
+
+    static_assert(
+        sizeof(SlotTopology1) == 1U
+    );
+
+    static_assert(
+        sizeof(SlotTopology8) == 1U
+    );
+
+    static_assert(
+        sizeof(SlotTopology9) == 2U
+    );
+
+    static_assert(
+        sizeof(SlotTopology255) == 32U
+    );
+
+    /// Composition fixture proving a zero-capacity slot topology need not increase owner size.
+    struct ZeroSlotTopologyHolder final {
+
+        // Composed state.
+
+        /// Empty topology permitted to overlap another member under C++20 empty-state composition.
+        [[no_unique_address]] SlotTopology0 Topology;
+
+        /// One-byte owner state establishing the expected complete fixture size.
+        std::uint8_t Marker = 0U;
+
+    };
+
+    static_assert(
+        sizeof(ZeroSlotTopologyHolder) == 1U
+    );
+
     // Intrusive-queue footprint aliases.
 
     /// One-byte-index queue used to validate two-byte endpoint storage.
@@ -271,6 +317,157 @@ namespace {
     );
 
 
+    /// Validates deterministic stable-slot acquisition, release, traversal and failure semantics.
+    constexpr bool ValidateSlotTopology() noexcept {
+        using Topology = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 4U>;
+        using Index = typename Topology::Index;
+        using AcquisitionStatus = ESPressio::BoundedTopology::BoundedSlotAcquisitionStatus;
+        using ReleaseResult = ESPressio::BoundedTopology::BoundedSlotReleaseResult;
+
+        Topology topology;
+
+        if (!topology.IsEmpty() || topology.IsFull() || topology.Count() != 0U) {
+            return false;
+        }
+
+        const auto first = topology.Acquire();
+        const auto second = topology.Acquire();
+        const auto third = topology.Acquire();
+        const auto fourth = topology.Acquire();
+
+        if (
+            first.Status() != AcquisitionStatus::Succeeded ||
+            first.AcquiredIndex().Value() != 0U ||
+            second.AcquiredIndex().Value() != 1U ||
+            third.AcquiredIndex().Value() != 2U ||
+            fourth.AcquiredIndex().Value() != 3U
+        ) {
+            return false;
+        }
+
+        if (!topology.IsFull() || topology.Count() != 4U) {
+            return false;
+        }
+
+        const auto full = topology.Acquire();
+
+        if (
+            full.Status() != AcquisitionStatus::Full ||
+            full.IsSucceeded() ||
+            full.AcquiredIndex().IsValid()
+        ) {
+            return false;
+        }
+
+        if (
+            topology.Release(
+                second.AcquiredIndex()
+            ) != ReleaseResult::Succeeded
+        ) {
+            return false;
+        }
+
+        if (
+            topology.Release(
+                second.AcquiredIndex()
+            ) != ReleaseResult::NotOccupied
+        ) {
+            return false;
+        }
+
+        if (
+            topology.Release(
+                Index::Invalid()
+            ) != ReleaseResult::InvalidIndex
+        ) {
+            return false;
+        }
+
+        const auto reacquired = topology.Acquire();
+
+        if (
+            !reacquired.IsSucceeded() ||
+            reacquired.AcquiredIndex().Value() != 1U ||
+            topology.Count() != 4U
+        ) {
+            return false;
+        }
+
+        if (topology.FindFirstOccupied().Value() != 0U) {
+            return false;
+        }
+
+        if (
+            topology.FindNextOccupied(
+                Index::FromUnchecked(
+                    0U
+                )
+            ).Value() != 1U
+        ) {
+            return false;
+        }
+
+        if (
+            topology.Release(
+                Index::FromUnchecked(
+                    2U
+                )
+            ) != ReleaseResult::Succeeded
+        ) {
+            return false;
+        }
+
+        if (
+            topology.FindNextOccupied(
+                Index::FromUnchecked(
+                    1U
+                )
+            ).Value() != 3U
+        ) {
+            return false;
+        }
+
+        if (
+            topology.FindNextOccupied(
+                Index::FromUnchecked(
+                    2U
+                )
+            ).Value() != 3U
+        ) {
+            return false;
+        }
+
+        if (
+            topology.FindNextOccupied(
+                Index::FromUnchecked(
+                    3U
+                )
+            ).IsValid()
+        ) {
+            return false;
+        }
+
+        if (
+            topology.FindNextOccupied(
+                Index::Invalid()
+            ).IsValid()
+        ) {
+            return false;
+        }
+
+        return
+            topology.IsOccupied(
+                reacquired.AcquiredIndex()
+            ) &&
+            topology.Count() == 3U &&
+            !topology.IsFull();
+    }
+
+    static_assert(
+        ValidateSlotTopology()
+    );
+
+
     /// Externally owned record fixture satisfying the intrusive queue linkage contract.
     ///
     /// @tparam TIndex Strong bounded index Type used for this record collection.
@@ -410,13 +607,15 @@ namespace {
     }
 
 
-    /// Validates stateless behavior for zero-capacity set and queue specializations.
+    /// Validates stateless behavior for zero-capacity set, stable-slot topology and queue specializations.
     void ValidateZeroCapacity() {
         using Set = ESPressio::BoundedTopology::BoundedIndexSet<RecordSpace, 0U>;
+        using SlotTopology = ESPressio::BoundedTopology::BoundedSlotTopology<RecordSpace, 0U>;
         using Queue = ESPressio::BoundedTopology::IntrusiveQueue<RecordSpace, 0U>;
         using Index = typename Queue::Index;
 
         Set set;
+        SlotTopology slots;
         Queue queue;
         std::array<QueueRecord<Index>, 0U> records{};
         Index output = Index::Invalid();
@@ -431,6 +630,34 @@ namespace {
 
         assert(
             !set.FindFirstSet().IsValid()
+        );
+
+        const auto acquisition = slots.Acquire();
+
+        assert(
+            slots.IsEmpty()
+        );
+
+        assert(
+            slots.IsFull()
+        );
+
+        assert(
+            slots.Count() == 0U
+        );
+
+        assert(
+            acquisition.Status() == ESPressio::BoundedTopology::BoundedSlotAcquisitionStatus::Full
+        );
+
+        assert(
+            !acquisition.AcquiredIndex().IsValid()
+        );
+
+        assert(
+            slots.Release(
+                Index::Invalid()
+            ) == ESPressio::BoundedTopology::BoundedSlotReleaseResult::InvalidIndex
         );
 
         assert(

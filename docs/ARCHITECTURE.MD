@@ -9,6 +9,7 @@ It exists because several higher ESPressio domains need the same low-level struc
 ```text
 finite identity
 compact membership state
+stable bounded slot acquisition/release
 FIFO relationship between externally owned records
 ```
 
@@ -20,6 +21,7 @@ EDP-BoundedTopology owns:
 
 - capacity-derived strong index identity;
 - compact bounded membership over that identity;
+- stable bounded slot acquisition/release over that same compact membership representation;
 - non-owning intrusive FIFO ordering over externally owned records.
 
 It does not own:
@@ -64,6 +66,16 @@ For positive capacity its complete persistent representation is `ceil(N / 8)` by
 The set assigns no semantic meaning to a set bit. A consumer may interpret membership as available, occupied, present, active, eligible, or another domain-specific Boolean fact.
 
 The zero-capacity specialization contains no state.
+
+## Stable bounded slot topology
+
+`BoundedSlotTopology<TIndexSpace, N>` composes `BoundedIndexSet<TIndexSpace, N>` into a reusable stable acquire/release contract. It adds **no persistent semantic state** beyond the occupancy bitmap.
+
+Acquisition scans for the numerically lowest clear occupancy bit, sets it, and returns the corresponding strong `BoundedIndex`. The acquired index remains stable until explicit release. Full acquisition, invalid release and release of a currently free slot are distinct strong outcomes.
+
+Occupied-slot traversal is stateless through `FindFirstOccupied()` and `FindNextOccupied(index)`. No iterator cursor, free list, cached population count, generation value or first-free hint is retained.
+
+Payload lifetime, stale-reference protection and transactional coupling between occupancy and external payload state remain responsibilities of the consuming domain. See [Stable Bounded Slot Topology](./STABLE_SLOT_TOPOLOGY.MD) for the complete contract.
 
 ## Intrusive FIFO topology
 

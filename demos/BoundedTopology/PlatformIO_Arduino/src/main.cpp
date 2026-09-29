@@ -10,11 +10,14 @@ namespace Demo {
     struct SlotSpace final {
     };
 
+    /// Four-entry stable slot topology used by this demonstration.
+    using Slots = ESPressio::BoundedTopology::BoundedSlotTopology<SlotSpace, 4U>;
+
     /// Four-entry intrusive FIFO used by this demonstration.
     using Queue = ESPressio::BoundedTopology::IntrusiveQueue<SlotSpace, 4U>;
 
-    /// Strong index Type shared by the queue and membership set.
-    using Index = typename Queue::Index;
+    /// Strong index Type shared by stable slots, membership and queue topology.
+    using Index = typename Slots::Index;
 
     /// External record whose queue linkage is owned by the record rather than the queue.
     struct Record final {
@@ -41,24 +44,25 @@ namespace Demo {
     };
 
 
-    /// Exercises compact membership and intrusive FIFO ordering without allocation.
+    /// Exercises stable acquisition, compact membership and intrusive FIFO ordering without allocation.
     bool Run() noexcept {
         using Set = ESPressio::BoundedTopology::BoundedIndexSet<SlotSpace, 4U>;
 
-        Set available;
+        Slots slots;
+        Set active;
         std::array<Record, 4U> records{};
         Queue queue;
 
-        available.SetAll();
+        const auto acquisition = slots.Acquire();
 
-        const auto claimed = available.FindFirstSet();
-
-        if (!claimed.IsValid()) {
+        if (!acquisition.IsSucceeded()) {
             return false;
         }
 
+        const auto claimed = acquisition.AcquiredIndex();
+
         if (
-            available.Clear(
+            active.Set(
                 claimed
             ) != ESPressio::BoundedTopology::BoundedIndexSetMutationResult::Succeeded
         ) {
@@ -85,15 +89,31 @@ namespace Demo {
             return false;
         }
 
+        if (
+            active.Clear(
+                removed
+            ) != ESPressio::BoundedTopology::BoundedIndexSetMutationResult::Succeeded
+        ) {
+            return false;
+        }
+
+        if (
+            slots.Release(
+                removed
+            ) != ESPressio::BoundedTopology::BoundedSlotReleaseResult::Succeeded
+        ) {
+            return false;
+        }
+
         return
             removed == claimed &&
-            queue.IsEmpty() &&
-            !available.IsSet(
-                claimed
-            );
+            slots.IsEmpty() &&
+            active.IsEmpty() &&
+            queue.IsEmpty();
     }
 
 } // Demo
+
 /// Runs the bounded-topology demonstration once after serial initialization.
 void setup() {
     Serial.begin(

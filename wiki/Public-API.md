@@ -19,6 +19,17 @@ All public declarations reside in namespace `ESPressio::BoundedTopology` and are
 - mutation: `Set`, `Clear`, `ClearAll`, `SetAll`
 - predicates/query: `IsSet`, `IsEmpty`, `IsAnySet`, `Count`, `FindFirstSet`, `FindFirstClear`
 
+## BoundedSlotTopology
+
+- `BoundedSlotAcquisitionStatus::{Succeeded, Full}`
+- `BoundedSlotReleaseResult::{Succeeded, InvalidIndex, NotOccupied}`
+- `BoundedSlotAcquisitionResult<TIndexSpace, TCapacity>`
+- `BoundedSlotTopology<TIndexSpace, TCapacity>`
+- aliases/metadata: `Index`, `AcquisitionResult`, `StorageBytes`, `Capacity()`
+- lifecycle: `Acquire`, `Release`
+- predicates/query: `IsOccupied`, `IsEmpty`, `IsFull`, `Count`
+- stateless traversal: `FindFirstOccupied`, `FindNextOccupied`
+
 ## IntrusiveQueue
 
 - `IntrusiveQueuePushResult::{Succeeded, InvalidIndex}`

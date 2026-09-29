@@ -1,12 +1,13 @@
 # EDP-BoundedTopology Demos
 
-The `BoundedTopology` logical demo exercises all three public facilities together:
+The `BoundedTopology` logical demo exercises all four public facilities together:
 
 - strong bounded index identity;
 - one-bit-per-index membership state;
+- stable lowest-free slot acquisition and explicit release;
 - non-owning intrusive FIFO ordering over externally owned records.
 
-The demo claims the lowest available slot, removes that slot from the availability set, enqueues its externally owned record, then pops the record and validates the final state.
+The demo acquires the lowest free stable slot, marks that slot active in a separate membership set, enqueues its externally owned record, then pops the record, clears the independent membership fact, releases the stable slot, and validates the final state.
 
 ## Target matrix
 

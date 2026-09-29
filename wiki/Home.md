@@ -2,10 +2,11 @@
 
 `EDP-BoundedTopology` owns the smallest shared runtime topology vocabulary needed for fixed finite index spaces across ESPressio.
 
-It owns three public primitives:
+It owns four public primitives:
 
 - `BoundedIndex<TIndexSpace, N>` — compact strong identity;
 - `BoundedIndexSet<TIndexSpace, N>` — one-bit-per-index membership;
+- `BoundedSlotTopology<TIndexSpace, N>` — stable lowest-free acquisition/release over occupancy-only state;
 - `IntrusiveQueue<TIndexSpace, N>` — non-owning FIFO ordering with linkage stored in external records.
 
 It deliberately does **not** own payload storage/lifetime, allocation, synchronization, waiting, providers, Composition, resource routing, semantic Pool behaviour, serialization, or domain-specific state.

@@ -36,9 +36,15 @@ The repository contains standard `library.properties` metadata and exports:
 
 Install or place the repository as an Arduino library, then open the supplied Arduino IDE demo.
 
+## GitHub Actions definition
+
+`.github/workflows/validate.yml` keeps the repository's CI contract aligned with the executable validation surfaces. It defines GCC and Clang host-test jobs plus PIOArduino Arduino-ESP32 and ESP-IDF demo-build jobs.
+
+GitHub Actions execution is supplemental evidence; RPI400 remains the authoritative operational validation appliance under the current Policy baseline.
+
 ## Validation scope
 
-The host tests are the current executable validation committed with the initial 0.1.0 baseline.
+The host tests validate the current public contract, including exact stable-slot topology footprint, deterministic acquisition/release/traversal, failure semantics, and zero-capacity composition.
 
 The target demo projects provide buildable integration surfaces for Arduino IDE, PlatformIO-compatible Arduino-ESP32 using PIOArduino, and PlatformIO ESP-IDF.
 
